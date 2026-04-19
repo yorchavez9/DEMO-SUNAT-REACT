@@ -95,18 +95,25 @@ async function request(method, path, body) {
     return await response.blob();
   }
 
-  const data = await response.json();
+  const raw = await response.json();
 
-  if (!response.ok) {
-    const msg = data.message || `Error ${response.status}`;
+  const normalized = {
+    success: raw.estado === 'exito' || raw.success === true,
+    message: raw.mensaje ?? raw.message,
+    data: raw.datos ?? raw.data,
+    errors: raw.errores ?? raw.errors,
+  };
+
+  if (!response.ok || !normalized.success) {
+    const msg = normalized.message || `Error ${response.status}`;
     const err = new Error(msg);
     err.status = response.status;
-    err.errors = data.errors;
-    err.data = data;
+    err.errors = normalized.errors;
+    err.data = normalized;
     throw err;
   }
 
-  return data;
+  return normalized;
 }
 
 export const api = {

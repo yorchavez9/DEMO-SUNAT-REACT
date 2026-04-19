@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getConfig, saveConfig } from '../api/client.js';
+import { getConfig, saveConfig, api } from '../api/client.js';
 import {
   Settings as SettingsIcon,
   Save,
@@ -31,19 +31,8 @@ export default function Settings() {
     setTesting(true);
     setTestResult(null);
     try {
-      const response = await fetch(`${config.base_url.replace(/\/$/, '')}/empresa`, {
-        headers: {
-          'Accept': 'application/json',
-          'X-Api-Key': config.api_key,
-          'X-Api-Secret': config.api_secret,
-        },
-      });
-      const data = await response.json();
-      if (response.ok && data.success) {
-        setTestResult({ success: true, empresa: data.data });
-      } else {
-        setTestResult({ success: false, error: data.message || `Error ${response.status}` });
-      }
+      const res = await api.getEmpresa();
+      setTestResult({ success: true, empresa: res.data });
     } catch (e) {
       setTestResult({ success: false, error: e.message });
     } finally {
@@ -131,7 +120,7 @@ export default function Settings() {
                   <div><strong>Empresa:</strong> {testResult.empresa.razon_social}</div>
                   <div><strong>RUC:</strong> {testResult.empresa.ruc}</div>
                   <div><strong>Plan:</strong> {testResult.empresa.plan}</div>
-                  <div><strong>Entorno:</strong> {testResult.empresa.environment}</div>
+                  <div><strong>Entorno:</strong> {testResult.empresa.entorno}</div>
                 </div>
                 <button onClick={() => navigate('/')} className="btn-primary text-sm mt-3 flex items-center gap-2">
                   Ir al Dashboard <ArrowRight className="w-4 h-4" />

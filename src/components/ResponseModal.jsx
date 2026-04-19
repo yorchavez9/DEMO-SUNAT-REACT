@@ -11,6 +11,7 @@ import {
   Printer,
 } from 'lucide-react';
 import { api } from '../api/client.js';
+import { fmtMoney } from '../utils.js';
 
 const PDF_FORMATS = [
   { value: 'ticket-80', label: 'Ticket 80mm', icon: Printer },
@@ -144,7 +145,7 @@ export default function ResponseModal({ response, error, onClose, tipo }) {
                   <>
                     <span className="text-slate-300">·</span>
                     <span className="font-bold text-slate-900">
-                      {data.tipo_moneda || 'PEN'} {parseFloat(data.totales?.total ?? data.mto_imp_venta).toFixed(2)}
+                      {fmtMoney(data.totales?.total ?? data.mto_imp_venta, data.tipo_moneda)}
                     </span>
                   </>
                 )}

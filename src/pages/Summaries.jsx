@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/client.js';
+import { fmtMoney } from '../utils.js';
 import {
   FileStack,
   Plus,
@@ -158,7 +159,7 @@ function NewSummaryModal({ onClose, onSuccess }) {
       setLoadingBoletas(true);
       api.listarBoletas('?estado=aceptado&por_pagina=50')
         .then((res) => {
-          const data = res.data?.data || [];
+          const data = res.data?.datos || [];
           setBoletasDisponibles(data);
         })
         .catch((e) => setError(e.message))
@@ -341,7 +342,7 @@ function NewSummaryModal({ onClose, onSuccess }) {
                                 {b.fecha_emision?.slice(0, 10)}
                               </span>
                               <span className="font-bold text-slate-700">
-                                {b.tipo_moneda || 'PEN'} {parseFloat(b.totales?.total ?? 0).toFixed(2)}
+                                {fmtMoney(b.totales?.total ?? 0, b.tipo_moneda)}
                               </span>
                             </div>
                             <div className="text-xs text-slate-500 truncate">

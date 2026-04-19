@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { api } from '../api/client.js';
+import { fmtMoney } from '../utils.js';
 import {
   FileText,
   Receipt,
@@ -48,7 +49,7 @@ export default function DocumentList() {
       if (filtro.buscar) params.append('buscar', filtro.buscar);
       const query = params.toString() ? `?${params.toString()}` : '';
       const res = await api[config.method](query);
-      setDocs(Array.isArray(res.data) ? res.data : (res.data?.data || []));
+      setDocs(Array.isArray(res.data) ? res.data : (res.data?.datos || []));
     } catch (e) {
       setError(e.message);
     } finally {
@@ -167,7 +168,7 @@ export default function DocumentList() {
                   <td className="text-slate-600">{d.fecha_emision?.slice(0, 10)}</td>
                   <td className="truncate max-w-xs">{clienteNombre}</td>
                   <td className="text-right font-bold text-slate-900">
-                    {d.tipo_moneda || 'PEN'} {parseFloat(total).toFixed(2)}
+                    {fmtMoney(total, d.tipo_moneda)}
                   </td>
                   <td><EstadoBadge estado={estado} /></td>
                   <td>

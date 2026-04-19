@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api/client.js';
+import { fmtMoney, fmtNumber } from '../utils.js';
 import {
   LayoutDashboard,
   FileText,
@@ -39,6 +40,13 @@ const COLORS_ESTADO = {
 
 const COLORS_MONEDA = ['#2563eb', '#f59e0b', '#8b5cf6', '#06b6d4'];
 
+const TIPO_LABEL = {
+  factura: 'Factura',
+  boleta: 'Boleta',
+  nota_credito: 'Nota Crédito',
+  nota_debito: 'Nota Débito',
+};
+
 export default function Dashboard() {
   const [indicadores, setIndicadores] = useState(null);
   const [recientes, setRecientes] = useState([]);
@@ -58,7 +66,7 @@ export default function Dashboard() {
     ])
       .then(([ind, rec, vm, es, pm]) => {
         if (ind?.data) setIndicadores(ind.data);
-        if (rec?.data) setRecientes(rec.data);
+        if (rec?.data?.documentos) setRecientes(rec.data.documentos);
         if (vm?.data) setVentasMes(vm.data);
         if (es?.data) setEstadoSunat(es.data);
         if (pm?.data) setPorMoneda(pm.data);
@@ -122,7 +130,7 @@ export default function Dashboard() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
               <KpiCard label="Ventas hoy" value={indicadores.hoy?.ventas} cantidad={indicadores.hoy?.documentos} />
               <KpiCard label="Esta semana" value={indicadores.semana?.ventas} cantidad={indicadores.semana?.documentos} />
-              <KpiCard label="Mes actual" value={indicadores.mes_actual?.ventas} cantidad={indicadores.mes_actual?.documentos} highlight />
+              <KpiCard label="Mes actual" value={indicadores.mes_actual?.ventas} cantidad={indicadores.mes_actual?.documentos} />
               <KpiCard label="Vs mes anterior" value={indicadores.crecimiento?.vs_mes_anterior} suffix="%" isGrowth />
             </div>
           )}
@@ -137,7 +145,7 @@ export default function Dashboard() {
               {ventasMes?.total_12_meses !== undefined && (
                 <div className="text-right">
                   <div className="text-xs text-slate-500 font-semibold uppercase tracking-wide">Total</div>
-                  <div className="text-lg font-extrabold text-slate-900">S/ {ventasMes.total_12_meses.toFixed(2)}</div>
+                  <div className="text-lg font-extrabold text-slate-900">{fmtMoney(ventasMes.total_12_meses)}</div>
                 </div>
               )}
             </div>
@@ -162,7 +170,7 @@ export default function Dashboard() {
                     padding: '0.75rem',
                     fontSize: '0.875rem',
                   }}
-                  formatter={(v) => [`S/ ${parseFloat(v).toFixed(2)}`, 'Ventas']}
+                  formatter={(v) => [fmtMoney(v), 'Ventas']}
                 />
                 <Bar dataKey="ventas" fill="url(#barGrad)" radius={[8, 8, 0, 0]} />
               </BarChart>
@@ -230,7 +238,7 @@ export default function Dashboard() {
                       </Pie>
                       <Tooltip
                         contentStyle={{ background: 'white', border: 'none', borderRadius: '0.5rem', boxShadow: '0 4px 20px rgb(15 23 42 / 0.1)', fontSize: '0.75rem' }}
-                        formatter={(v, n) => [`${n} ${parseFloat(v).toFixed(2)}`, 'Ventas']}
+                        formatter={(v, n) => [`${n} ${fmtNumber(v)}`, 'Ventas']}
                       />
                     </PieChart>
                   </ResponsiveContainer>
@@ -239,7 +247,7 @@ export default function Dashboard() {
                       <div key={m.name} className="flex items-center gap-1.5 text-xs">
                         <span className="w-2.5 h-2.5 rounded-full" style={{ background: m.color }} />
                         <span className="font-bold text-slate-700">{m.name}:</span>
-                        <span className="text-slate-500">{m.value.toFixed(2)} ({m.docs} docs)</span>
+                        <span className="text-slate-500">{fmtNumber(m.value)} ({m.docs} docs)</span>
                       </div>
                     ))}
                   </div>
@@ -269,11 +277,11 @@ export default function Dashboard() {
                   <tbody>
                     {recientes.slice(0, 10).map((d, i) => (
                       <tr key={i}>
-                        <td>{d.tipo_descripcion}</td>
-                        <td className="font-mono">{d.numero_completo}</td>
+                        <td>{TIPO_LABEL[d.tipo] || d.tipo}</td>
+                        <td className="font-mono">{d.numero}</td>
                         <td className="truncate max-w-xs">{d.cliente}</td>
-                        <td className="text-right">S/ {parseFloat(d.monto_total || 0).toFixed(2)}</td>
-                        <td><EstadoBadge estado={d.sunat_status} /></td>
+                        <td className="text-right">{fmtMoney(d.total, d.moneda)}</td>
+                        <td><EstadoBadge estado={d.estado_sunat} /></td>
                       </tr>
                     ))}
                   </tbody>
@@ -301,7 +309,7 @@ function QuickAction({ to, Icon, label, color }) {
 
 function KpiCard({ label, value, cantidad, suffix = '', isGrowth = false, highlight = false }) {
   const numValue = value !== undefined && value !== null ? parseFloat(value) : null;
-  const formatted = numValue !== null ? numValue.toFixed(2) : '0.00';
+  const formatted = numValue !== null ? fmtNumber(numValue) : '0.00';
   const positive = isGrowth && (numValue ?? 0) > 0;
   const negative = isGrowth && (numValue ?? 0) < 0;
   const prefix = isGrowth ? '' : 'S/ ';
