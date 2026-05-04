@@ -33,10 +33,19 @@ export default function NewBoleta() {
   const [pdfFormat, setPdfFormat] = useState('ticket-80');
   const [cuotas, setCuotas] = useState([]);
 
+  function calcCuotas(count) {
+    const total = items.reduce((s, it) => s + parseFloat(it.cantidad || 0) * parseFloat(it.precio_unitario || 0), 0);
+    const base = total > 0 ? parseFloat((total / count).toFixed(2)) : 0;
+    const today = new Date();
+    return Array.from({ length: count }, (_, i) => {
+      const d = new Date(today);
+      d.setMonth(d.getMonth() + i + 1);
+      const monto = total > 0 ? (i === count - 1 ? parseFloat((total - base * (count - 1)).toFixed(2)) : base) : '';
+      return { fecha_pago: d.toISOString().split('T')[0], monto: monto === '' ? '' : String(monto) };
+    });
+  }
   function addCuota() {
-    const d = new Date();
-    d.setMonth(d.getMonth() + 1);
-    setCuotas([...cuotas, { fecha_pago: d.toISOString().split('T')[0], monto: '' }]);
+    setCuotas(calcCuotas(cuotas.length + 1));
   }
   function updateCuota(i, field, value) {
     const next = [...cuotas];
@@ -44,7 +53,9 @@ export default function NewBoleta() {
     setCuotas(next);
   }
   function removeCuota(i) {
-    setCuotas(cuotas.filter((_, idx) => idx !== i));
+    const remaining = cuotas.length - 1;
+    if (remaining === 0) { setCuotas([]); return; }
+    setCuotas(calcCuotas(remaining));
   }
 
   function addProduct(p) {
