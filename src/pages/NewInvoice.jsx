@@ -5,7 +5,7 @@ import ClientPicker from '../components/ClientPicker.jsx';
 import ItemsTable from '../components/ItemsTable.jsx';
 import ResponseModal from '../components/ResponseModal.jsx';
 import PdfFormatPicker from '../components/PdfFormatPicker.jsx';
-import { FileText, Plus, Loader2, Check } from 'lucide-react';
+import { FileText, Plus, Loader2, Check, X } from 'lucide-react';
 import ClientSelector from '../components/ClientSelector.jsx';
 
 export default function NewInvoice() {
@@ -27,6 +27,21 @@ export default function NewInvoice() {
   const [response, setResponse] = useState(null);
   const [error, setError] = useState(null);
   const [pdfFormat, setPdfFormat] = useState('ticket-80');
+  const [cuotas, setCuotas] = useState([]);
+
+  function addCuota() {
+    const d = new Date();
+    d.setMonth(d.getMonth() + 1);
+    setCuotas([...cuotas, { fecha_pago: d.toISOString().split('T')[0], monto: '' }]);
+  }
+  function updateCuota(i, field, value) {
+    const next = [...cuotas];
+    next[i] = { ...next[i], [field]: value };
+    setCuotas(next);
+  }
+  function removeCuota(i) {
+    setCuotas(cuotas.filter((_, idx) => idx !== i));
+  }
 
   function addProduct(p) {
     const item = {
@@ -56,9 +71,14 @@ export default function NewInvoice() {
       alert('Agrega al menos un producto');
       return;
     }
+    if (form.forma_pago === 'Credito' && cuotas.length === 0) {
+      alert('Agrega al menos una cuota para el pago a crédito');
+      return;
+    }
 
     const payload = {
       ...form,
+      ...(form.forma_pago === 'Credito' ? { cuotas: cuotas.map((c) => ({ monto: parseFloat(c.monto), fecha_pago: c.fecha_pago })) } : {}),
       cliente: {
         tipo_doc: cliente.tipo_doc,
         num_doc: cliente.num_doc,
@@ -148,6 +168,43 @@ export default function NewInvoice() {
             </div>
           </div>
         </div>
+
+        {/* Cuotas de pago */}
+        {form.forma_pago === 'Credito' && (
+          <div className="card">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="section-title mb-0">Cuotas de pago</h2>
+              <button type="button" onClick={addCuota} className="btn-primary text-sm flex items-center gap-2">
+                <Plus className="w-4 h-4" /> Agregar cuota
+              </button>
+            </div>
+            {cuotas.length === 0 ? (
+              <p className="text-sm text-slate-500">Agrega al menos una cuota.</p>
+            ) : (
+              <div className="space-y-2">
+                {cuotas.map((c, i) => (
+                  <div key={i} className="flex gap-2 items-end">
+                    <div className="flex-1">
+                      <label className="label">Fecha pago</label>
+                      <input type="date" className="input" value={c.fecha_pago}
+                        onChange={(e) => updateCuota(i, 'fecha_pago', e.target.value)} required />
+                    </div>
+                    <div className="flex-1">
+                      <label className="label">Monto</label>
+                      <input type="number" className="input" value={c.monto}
+                        onChange={(e) => updateCuota(i, 'monto', e.target.value)}
+                        placeholder="0.00" min="0.01" step="0.01" required />
+                    </div>
+                    <button type="button" onClick={() => removeCuota(i)}
+                      className="mb-0.5 p-2 text-red-500 hover:text-red-700 flex-shrink-0">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Cliente */}
         <div className="card">
