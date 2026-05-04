@@ -43,12 +43,18 @@ export function isLoggedIn() {
 }
 
 // ─── Configuración de la API ──────────────────────────
+const DEFAULT_CONFIG = {
+  base_url: 'https://apisunatv2.kodevo.es/api/v1',
+  api_key: 'H5jdBH0YfhjTBzmwn1zP6PjDxruytaTixX6O4gRJiuyp1IqIbNE1TwU2lmcFL2d7',
+  api_secret: 'e4fb0d4e7f1bd2cab916c58d47748916ab9ce1cd7c79ee6f5c63752f4eee0612',
+};
+
 export function getConfig() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : { base_url: 'https://api.kodevo.es/sunat-api/api/v1', api_key: '', api_secret: '' };
+    return raw ? JSON.parse(raw) : { ...DEFAULT_CONFIG };
   } catch {
-    return { base_url: 'https://api.kodevo.es/sunat-api/api/v1', api_key: '', api_secret: '' };
+    return { ...DEFAULT_CONFIG };
   }
 }
 

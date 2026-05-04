@@ -3,6 +3,7 @@ import { api } from '../api/client.js';
 import ProductPicker from '../components/ProductPicker.jsx';
 import ClientPicker from '../components/ClientPicker.jsx';
 import ResponseModal from '../components/ResponseModal.jsx';
+import PdfFormatPicker from '../components/PdfFormatPicker.jsx';
 import { Truck, Plus, Loader2, Check, Car, X } from 'lucide-react';
 import ClientSelector from '../components/ClientSelector.jsx';
 
@@ -49,6 +50,7 @@ export default function NewDispatchGuide() {
   const [sending, setSending] = useState(false);
   const [response, setResponse] = useState(null);
   const [error, setError] = useState(null);
+  const [pdfFormat, setPdfFormat] = useState('ticket-80');
 
   function addProduct(p) {
     setItems([...items, {
@@ -305,7 +307,8 @@ export default function NewDispatchGuide() {
           <textarea className="input" rows={2} value={form.observacion} onChange={(e) => setForm({ ...form, observacion: e.target.value })} />
         </div>
 
-        <div className="flex justify-end">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <PdfFormatPicker value={pdfFormat} onChange={setPdfFormat} />
           <button type="submit" disabled={sending} className="btn-primary flex items-center gap-2">
             {sending ? <><Loader2 className="w-4 h-4 animate-spin" /> Emitiendo...</> : <><Check className="w-4 h-4" /> Emitir Guía</>}
           </button>
@@ -315,7 +318,7 @@ export default function NewDispatchGuide() {
       {showProductPicker && <ProductPicker onSelect={addProduct} onClose={() => setShowProductPicker(false)} />}
       {showClientPicker && <ClientPicker onSelect={setDestinatario} onClose={() => setShowClientPicker(false)} />}
       {(response || error) && (
-        <ResponseModal response={response} error={error} tipo="guias-remision" onClose={() => { setResponse(null); setError(null); }} />
+        <ResponseModal response={response} error={error} tipo="guias-remision" pdfFormat={pdfFormat} onClose={() => { setResponse(null); setError(null); }} />
       )}
     </div>
   );

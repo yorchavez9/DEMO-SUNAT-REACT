@@ -4,6 +4,7 @@ import ProductPicker from '../components/ProductPicker.jsx';
 import ClientPicker from '../components/ClientPicker.jsx';
 import ItemsTable from '../components/ItemsTable.jsx';
 import ResponseModal from '../components/ResponseModal.jsx';
+import PdfFormatPicker from '../components/PdfFormatPicker.jsx';
 import { Receipt, Plus, Loader2, UserX, Save, Send } from 'lucide-react';
 import ClientSelector from '../components/ClientSelector.jsx';
 
@@ -29,6 +30,7 @@ export default function NewBoleta() {
   const [sending, setSending] = useState(false);
   const [response, setResponse] = useState(null);
   const [error, setError] = useState(null);
+  const [pdfFormat, setPdfFormat] = useState('ticket-80');
 
   function addProduct(p) {
     setItems([...items, {
@@ -160,23 +162,26 @@ export default function NewBoleta() {
             Lo más común es <strong>solo guardarla</strong> y al final del día enviar todas en lote vía Resumen Diario.
             Si necesitas enviarla a SUNAT inmediatamente, usa "Enviar a SUNAT".
           </p>
-          <div className="flex gap-2 justify-end flex-wrap">
-            <button
-              type="button"
-              onClick={() => submit(true)}
-              disabled={sending}
-              className="btn-secondary"
-            >
-              {sending ? <><Loader2 className="w-4 h-4 animate-spin" /> Guardando...</> : <><Save className="w-4 h-4" /> Solo guardar (pendiente)</>}
-            </button>
-            <button
-              type="button"
-              onClick={() => submit(false)}
-              disabled={sending}
-              className="btn-primary"
-            >
-              {sending ? <><Loader2 className="w-4 h-4 animate-spin" /> Enviando...</> : <><Send className="w-4 h-4" /> Enviar a SUNAT ahora</>}
-            </button>
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <PdfFormatPicker value={pdfFormat} onChange={setPdfFormat} />
+            <div className="flex gap-2 flex-wrap">
+              <button
+                type="button"
+                onClick={() => submit(true)}
+                disabled={sending}
+                className="btn-secondary"
+              >
+                {sending ? <><Loader2 className="w-4 h-4 animate-spin" /> Guardando...</> : <><Save className="w-4 h-4" /> Solo guardar (pendiente)</>}
+              </button>
+              <button
+                type="button"
+                onClick={() => submit(false)}
+                disabled={sending}
+                className="btn-primary"
+              >
+                {sending ? <><Loader2 className="w-4 h-4 animate-spin" /> Enviando...</> : <><Send className="w-4 h-4" /> Enviar a SUNAT ahora</>}
+              </button>
+            </div>
           </div>
         </div>
       </form>
@@ -184,7 +189,7 @@ export default function NewBoleta() {
       {showProductPicker && <ProductPicker onSelect={addProduct} onClose={() => setShowProductPicker(false)} />}
       {showClientPicker && <ClientPicker onSelect={setCliente} onClose={() => setShowClientPicker(false)} />}
       {(response || error) && (
-        <ResponseModal response={response} error={error} tipo="boletas" onClose={() => { setResponse(null); setError(null); }} />
+        <ResponseModal response={response} error={error} tipo="boletas" pdfFormat={pdfFormat} onClose={() => { setResponse(null); setError(null); }} />
       )}
     </div>
   );

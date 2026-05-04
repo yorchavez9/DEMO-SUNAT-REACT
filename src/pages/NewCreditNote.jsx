@@ -4,6 +4,7 @@ import ProductPicker from '../components/ProductPicker.jsx';
 import ClientPicker from '../components/ClientPicker.jsx';
 import ItemsTable from '../components/ItemsTable.jsx';
 import ResponseModal from '../components/ResponseModal.jsx';
+import PdfFormatPicker from '../components/PdfFormatPicker.jsx';
 import { TrendingDown, Plus, Loader2, Check } from 'lucide-react';
 import ClientSelector from '../components/ClientSelector.jsx';
 
@@ -40,6 +41,7 @@ export default function NewCreditNote() {
   const [sending, setSending] = useState(false);
   const [response, setResponse] = useState(null);
   const [error, setError] = useState(null);
+  const [pdfFormat, setPdfFormat] = useState('ticket-80');
 
   function addProduct(p) {
     setItems([...items, {
@@ -180,7 +182,8 @@ export default function NewCreditNote() {
           </p>
         </div>
 
-        <div className="flex justify-end">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <PdfFormatPicker value={pdfFormat} onChange={setPdfFormat} />
           <button type="submit" disabled={sending} className="btn-primary flex items-center gap-2">
             {sending ? <><Loader2 className="w-4 h-4 animate-spin" /> Emitiendo...</> : <><Check className="w-4 h-4" /> Emitir Nota de Crédito</>}
           </button>
@@ -190,7 +193,7 @@ export default function NewCreditNote() {
       {showProductPicker && <ProductPicker onSelect={addProduct} onClose={() => setShowProductPicker(false)} />}
       {showClientPicker && <ClientPicker onSelect={setCliente} onClose={() => setShowClientPicker(false)} />}
       {(response || error) && (
-        <ResponseModal response={response} error={error} tipo="notas-credito" onClose={() => { setResponse(null); setError(null); }} />
+        <ResponseModal response={response} error={error} tipo="notas-credito" pdfFormat={pdfFormat} onClose={() => { setResponse(null); setError(null); }} />
       )}
     </div>
   );
