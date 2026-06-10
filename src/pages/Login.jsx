@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../api/client.js';
-import { FileDigit, LogIn, XCircle, Zap, ShieldCheck, Sparkles, Info } from 'lucide-react';
+import { ShieldCheck, LogIn, XCircle, Info, Eye, EyeOff } from 'lucide-react';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -9,11 +9,11 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showPass, setShowPass] = useState(false);
 
   function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
-    // Pequeño delay para sentir responsive
     setTimeout(() => {
       const ok = login(usuario, password);
       if (!ok) {
@@ -26,80 +26,68 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex bg-white">
-      {/* ═══════════ PANEL IZQUIERDO — Marca ═══════════ */}
-      <div className="hidden lg:flex lg:w-[45%] relative overflow-hidden p-12 flex-col justify-between" style={{ background: 'rgb(15 23 42)' }}>
-        {/* Formas decorativas (colores sólidos con alpha, no gradientes) */}
-        <div
-          className="absolute rounded-full pointer-events-none"
-          style={{ top: '-120px', right: '-120px', width: '380px', height: '380px', background: 'rgb(37 99 235 / 0.25)' }}
-        />
-        <div
-          className="absolute rounded-full pointer-events-none"
-          style={{ bottom: '-80px', left: '-100px', width: '320px', height: '320px', background: 'rgb(59 130 246 / 0.18)' }}
-        />
-        <div
-          className="absolute rounded-full pointer-events-none"
-          style={{ top: '35%', left: '55%', width: '180px', height: '180px', background: 'rgb(96 165 250 / 0.12)' }}
-        />
+    <div style={{
+      minHeight: '100vh',
+      background: '#001238',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '1.5rem',
+      position: 'relative',
+      overflow: 'hidden',
+    }}>
+      {/* Blobs decorativos */}
+      <div style={{ position: 'absolute', top: '-15%', right: '-10%', width: '50vw', height: '50vw', borderRadius: '50%', background: 'rgba(0,48,135,0.35)', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', bottom: '-15%', left: '-10%', width: '40vw', height: '40vw', borderRadius: '50%', background: 'rgba(204,0,1,0.1)', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', top: '40%', left: '30%', width: '25vw', height: '25vw', borderRadius: '50%', background: 'rgba(0,32,96,0.2)', pointerEvents: 'none' }} />
 
-        {/* Header */}
-        <div className="relative z-10 flex items-center gap-3 text-white">
-          <div className="w-11 h-11 rounded-2xl flex items-center justify-center" style={{ background: 'rgb(37 99 235)' }}>
-            <FileDigit className="w-6 h-6" />
+      {/* Card */}
+      <div style={{
+        background: 'white',
+        borderRadius: '1.25rem',
+        maxWidth: '400px',
+        width: '100%',
+        boxShadow: '0 25px 60px rgba(0,0,0,0.5)',
+        overflow: 'hidden',
+        position: 'relative',
+      }}>
+        {/* Franja bandera peruana */}
+        <div style={{ height: '6px', background: 'linear-gradient(to right, #CC0001 33.33%, white 33.33%, white 66.66%, #CC0001 66.66%)' }} />
+
+        {/* Cabecera */}
+        <div style={{ padding: '2rem 2rem 1.25rem', textAlign: 'center' }}>
+          {/* Badge / Sello */}
+          <div style={{
+            width: '84px', height: '84px', borderRadius: '50%',
+            background: '#002060',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            margin: '0 auto 1rem',
+            border: '3px solid #C8A000',
+            boxShadow: '0 0 0 6px rgba(200,160,0,0.12), 0 8px 24px rgba(0,32,96,0.3)',
+          }}>
+            <ShieldCheck style={{ width: '42px', height: '42px', color: '#C8A000' }} />
           </div>
-          <div>
-            <div className="text-lg font-extrabold tracking-tight">SUNAT Demo</div>
-            <div className="text-xs text-slate-400 font-medium">Sistema de facturación</div>
+          <div style={{ fontSize: '1.375rem', fontWeight: '800', color: '#002060', letterSpacing: '0.08em' }}>
+            SUNAT
+          </div>
+          <div style={{ fontSize: '0.8rem', fontWeight: '600', color: '#334155', marginTop: '0.25rem' }}>
+            Facturación Electrónica
+          </div>
+          <div style={{ fontSize: '0.68rem', color: '#94a3b8', marginTop: '0.2rem', lineHeight: 1.4 }}>
+            Superintendencia Nacional de Aduanas<br />y de Administración Tributaria
           </div>
         </div>
 
-        {/* Hero */}
-        <div className="relative z-10 text-white">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold tracking-wide mb-6" style={{ background: 'rgb(37 99 235 / 0.25)', color: 'rgb(147 197 253)' }}>
-            <Sparkles className="w-3.5 h-3.5" />
-            Demo interactiva
-          </div>
-          <h2 className="text-4xl xl:text-5xl font-extrabold leading-[1.1] tracking-tight mb-4">
-            Facturación electrónica <span className="text-blue-400">sin complicaciones.</span>
-          </h2>
-          <p className="text-slate-300 text-base leading-relaxed max-w-md">
-            Emite facturas, boletas, notas de crédito y guías de remisión conectándote directamente a SUNAT. Todo desde una única API.
-          </p>
+        {/* Separador */}
+        <div style={{ height: '1px', background: '#e2e8f0', margin: '0 1.5rem' }} />
 
-          {/* Features */}
-          <div className="mt-10 space-y-4">
-            <Feature Icon={Zap} title="Emisión en segundos" subtitle="Envío directo a SUNAT o en modo lote" />
-            <Feature Icon={ShieldCheck} title="Certificado digital" subtitle="Firma XML + validación SUNAT incluida" />
-          </div>
-        </div>
+        {/* Formulario */}
+        <div style={{ padding: '1.5rem 2rem 2rem' }}>
+          <h1 style={{ fontSize: '1rem', fontWeight: '700', color: '#002060', textAlign: 'center', marginBottom: '1.25rem' }}>
+            Iniciar Sesión
+          </h1>
 
-        {/* Footer */}
-        <div className="relative z-10 flex items-center justify-between text-xs text-slate-400">
-          <div>Hecho con ♥ en Perú</div>
-          <div className="font-mono">v1.0.0</div>
-        </div>
-      </div>
-
-      {/* ═══════════ PANEL DERECHO — Formulario ═══════════ */}
-      <div className="flex-1 flex items-center justify-center p-6 sm:p-10">
-        <div className="w-full max-w-sm">
-          {/* Logo móvil */}
-          <div className="lg:hidden flex flex-col items-center mb-8">
-            <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-white mb-3" style={{ background: 'rgb(37 99 235)' }}>
-              <FileDigit className="w-7 h-7" />
-            </div>
-            <div className="text-lg font-extrabold tracking-tight text-slate-900">SUNAT Demo</div>
-          </div>
-
-          <div className="mb-8">
-            <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 mb-1.5">
-              Bienvenido 👋
-            </h1>
-            <p className="text-slate-500 text-sm">Inicia sesión para acceder a la demo.</p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div>
               <label className="label">Usuario</label>
               <input
@@ -107,72 +95,93 @@ export default function Login() {
                 className="input"
                 value={usuario}
                 onChange={(e) => { setUsuario(e.target.value); setError(null); }}
-                placeholder="demo"
+                placeholder="Ingrese su usuario"
                 required
               />
             </div>
             <div>
               <label className="label">Contraseña</label>
-              <input
-                type="password"
-                className="input"
-                value={password}
-                onChange={(e) => { setPassword(e.target.value); setError(null); }}
-                placeholder="demo123"
-                required
-              />
+              <div style={{ position: 'relative' }}>
+                <input
+                  type={showPass ? 'text' : 'password'}
+                  className="input"
+                  style={{ paddingRight: '2.75rem' }}
+                  value={password}
+                  onChange={(e) => { setPassword(e.target.value); setError(null); }}
+                  placeholder="Ingrese su contraseña"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPass(!showPass)}
+                  style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', padding: 0, display: 'flex', alignItems: 'center' }}
+                >
+                  {showPass
+                    ? <EyeOff style={{ width: '16px', height: '16px' }} />
+                    : <Eye style={{ width: '16px', height: '16px' }} />}
+                </button>
+              </div>
             </div>
 
             {error && (
-              <div className="p-3 bg-red-50 rounded-xl text-sm text-red-700 flex items-center gap-2">
-                <XCircle className="w-4 h-4 flex-shrink-0" /> {error}
+              <div style={{ padding: '0.75rem', background: '#fef2f2', borderRadius: '0.625rem', fontSize: '0.875rem', color: '#b91c1c', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <XCircle style={{ width: '16px', height: '16px', flexShrink: 0 }} /> {error}
               </div>
             )}
 
-            <button type="submit" disabled={loading} className="btn-primary w-full mt-2" style={{ padding: '0.75rem 1rem' }}>
+            <button
+              type="submit"
+              disabled={loading}
+              style={{
+                width: '100%',
+                padding: '0.75rem 1rem',
+                marginTop: '0.25rem',
+                background: loading ? '#94a3b8' : '#002060',
+                color: 'white',
+                border: 'none',
+                borderRadius: '0.625rem',
+                fontWeight: '700',
+                fontSize: '0.9375rem',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem',
+                transition: 'background 0.15s',
+              }}
+            >
               {loading ? (
-                <><span className="inline-block w-4 h-4 rounded-full animate-spin" style={{ border: '2px solid rgb(255 255 255 / 0.4)', borderTopColor: 'white' }} /> Entrando...</>
+                <>
+                  <span style={{ display: 'inline-block', width: '1rem', height: '1rem', borderRadius: '50%', border: '2px solid rgba(255,255,255,0.4)', borderTopColor: 'white', animation: 'icon-spin 0.8s linear infinite' }} />
+                  Verificando...
+                </>
               ) : (
-                <><LogIn className="w-4 h-4" /> Entrar</>
+                <><LogIn style={{ width: '16px', height: '16px' }} /> Ingresar al Sistema</>
               )}
             </button>
           </form>
 
           {/* Credenciales demo */}
-          <div className="mt-6 p-4 rounded-xl bg-slate-100">
-            <div className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-widest text-slate-600 mb-2">
-              <Info className="w-3 h-3" /> Credenciales demo
+          <div style={{ marginTop: '1.25rem', padding: '0.875rem', borderRadius: '0.625rem', background: '#f0f4ff', border: '1px solid #dbeafe' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', fontSize: '10px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#002060', marginBottom: '0.5rem' }}>
+              <Info style={{ width: '12px', height: '12px' }} /> Credenciales de acceso demo
             </div>
-            <div className="grid grid-cols-2 gap-2 text-xs">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
               <div>
-                <div className="text-[10px] text-slate-500 font-semibold uppercase">Usuario</div>
-                <code className="block mt-0.5 px-2 py-1 bg-white rounded-md font-mono font-bold text-slate-900">demo</code>
+                <div style={{ fontSize: '10px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Usuario</div>
+                <code style={{ display: 'block', marginTop: '0.125rem', padding: '0.25rem 0.5rem', background: 'white', borderRadius: '0.375rem', fontFamily: 'monospace', fontWeight: '700', color: '#002060', fontSize: '0.8125rem' }}>demo</code>
               </div>
               <div>
-                <div className="text-[10px] text-slate-500 font-semibold uppercase">Contraseña</div>
-                <code className="block mt-0.5 px-2 py-1 bg-white rounded-md font-mono font-bold text-slate-900">demo123</code>
+                <div style={{ fontSize: '10px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Contraseña</div>
+                <code style={{ display: 'block', marginTop: '0.125rem', padding: '0.25rem 0.5rem', background: 'white', borderRadius: '0.375rem', fontFamily: 'monospace', fontWeight: '700', color: '#002060', fontSize: '0.8125rem' }}>demo123</code>
               </div>
             </div>
           </div>
 
-          <div className="mt-6 text-center text-xs text-slate-400">
+          <div style={{ marginTop: '1.25rem', textAlign: 'center', fontSize: '0.6875rem', color: '#94a3b8' }}>
             © {new Date().getFullYear()} SUNAT Demo · Solo para pruebas
           </div>
         </div>
-      </div>
-    </div>
-  );
-}
-
-function Feature({ Icon, title, subtitle }) {
-  return (
-    <div className="flex items-start gap-3">
-      <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgb(37 99 235 / 0.2)' }}>
-        <Icon className="w-5 h-5 text-blue-300" />
-      </div>
-      <div>
-        <div className="font-bold text-white text-sm">{title}</div>
-        <div className="text-xs text-slate-400 mt-0.5">{subtitle}</div>
       </div>
     </div>
   );
