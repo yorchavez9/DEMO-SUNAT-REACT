@@ -15,6 +15,7 @@ import {
   X,
   FileStack,
   LogOut,
+  Ban,
 } from 'lucide-react';
 
 const LINK_CLASS = ({ isActive }) =>
@@ -117,6 +118,9 @@ export default function Layout() {
           </NavLink>
           <NavLink to="/resumenes" className={LINK_CLASS}>
             <FileStack className={IC} /> Resumen Diario
+          </NavLink>
+          <NavLink to="/anulaciones" className={LINK_CLASS}>
+            <Ban className={IC} /> Anulaciones
           </NavLink>
 
           <div className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 px-3 mt-5 mb-2">

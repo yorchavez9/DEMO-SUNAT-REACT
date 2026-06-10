@@ -195,6 +195,12 @@ export const api = {
   listarResumenes: (query = '') => request('GET', `/resumenes${query}`),
   estadoResumen: (id) => request('GET', `/resumenes/${id}/estado`),
 
+  // ─── Anulaciones (Comunicación de Baja) ───────────────
+  crearAnulacion: (data) => request('POST', '/anulaciones', data),
+  listarAnulaciones: (query = '') => request('GET', `/anulaciones${query}`),
+  estadoAnulacion: (id) => request('GET', `/anulaciones/${id}/estado`),
+  enviarAnulacion: (id) => request('POST', `/anulaciones/${id}/enviar`),
+
   // ─── Descargas ────────────────────────────────────────
   descargarPdf: (tipo, id, format = 'a4') => request('GET', `/${tipo}/${id}/pdf?format=${format}`),
   descargarXml: (tipo, id) => request('GET', `/${tipo}/${id}/xml`),

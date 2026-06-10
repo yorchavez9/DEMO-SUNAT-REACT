@@ -9,6 +9,7 @@ import NewDebitNote from './pages/NewDebitNote.jsx';
 import NewDispatchGuide from './pages/NewDispatchGuide.jsx';
 import DocumentList from './pages/DocumentList.jsx';
 import Summaries from './pages/Summaries.jsx';
+import Anulaciones from './pages/Anulaciones.jsx';
 import Login from './pages/Login.jsx';
 
 export default function App() {
@@ -25,6 +26,7 @@ export default function App() {
         <Route path="/nueva-guia" element={<NewDispatchGuide />} />
         <Route path="/documentos/:tipo" element={<DocumentList />} />
         <Route path="/resumenes" element={<Summaries />} />
+        <Route path="/anulaciones" element={<Anulaciones />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Route>
     </Routes>
