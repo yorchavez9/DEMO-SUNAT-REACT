@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { PRODUCTOS_DEMO } from '../data/productos.js';
+import { SUNAT_UNITS } from './ItemsTable.jsx';
 import { Search, X } from 'lucide-react';
 
 /**
@@ -63,7 +64,7 @@ export default function ProductPicker({ onSelect, onClose }) {
                       <div>{p.descripcion}</div>
                       <div className="text-xs text-slate-400">{p.categoria}</div>
                     </td>
-                    <td className="text-xs">{p.unidad}</td>
+                    <td className="text-xs">{SUNAT_UNITS.find((u) => u.cod === p.unidad)?.sym || p.unidad}</td>
                     <td className="text-right font-semibold">S/ {p.precio_unitario.toFixed(2)}</td>
                     <td>
                       <button

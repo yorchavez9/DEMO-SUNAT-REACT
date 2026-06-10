@@ -47,6 +47,7 @@ const DEFAULT_CONFIG = {
   base_url: 'https://apisunatv2.kodevo.es/api/v1',
   api_key: 'CiYYgu7XWPj080F6vWkZwQwVKDtU5ZN16T2kRt31VhfEwbzJVgCKVFunH8HQWXHK',
   api_secret: '077069428c4b6aef90915b438052ffc159093fc8aceff1e489c95daed6897624',
+  jsonpe_token: '461a4e35bb683c7b21e8da62a012108f81422441ed843b5b6a510f9b9fa8',
 };
 
 export function getConfig() {
@@ -68,9 +69,10 @@ export function isConfigured() {
 }
 
 // ─── API json.pe — consulta RUC / DNI ─────────────────
-const JSONPE_TOKEN = '461a4e35bb683c7b21e8da62a012108f81422441ed843b5b6a510f9b9fa8';
-
 async function buscarDocumentoExterno(tipo, numero) {
+  const { jsonpe_token } = getConfig();
+  if (!jsonpe_token) throw new Error('Falta configurar el Token de api.json.pe en Configuración.');
+
   const esRuc = tipo === '6';
   const url = `https://api.json.pe/api/${esRuc ? 'ruc' : 'dni'}`;
   const body = esRuc ? { ruc: numero } : { dni: numero };
@@ -78,7 +80,7 @@ async function buscarDocumentoExterno(tipo, numero) {
   const res = await fetch(url, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${JSONPE_TOKEN}`,
+      'Authorization': `Bearer ${jsonpe_token}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(body),

@@ -1,8 +1,76 @@
 import { X } from 'lucide-react';
 
-/**
- * Tabla de ítems editable con cálculo automático de IGV/Total.
- */
+export const SUNAT_UNITS = [
+  { cod: 'NIU', sym: 'UND', desc: 'Unidad' },
+  { cod: 'ZZ',  sym: 'SERV', desc: 'Servicio' },
+  { cod: 'HUR', sym: 'HR',   desc: 'Hora' },
+  { cod: 'BX',  sym: 'CAJ',  desc: 'Caja' },
+  { cod: 'GLL', sym: 'GL',   desc: 'Galón' },
+  { cod: 'GRM', sym: 'GR',   desc: 'Gramos' },
+  { cod: 'KGM', sym: 'KG',   desc: 'Kilos' },
+  { cod: 'LTR', sym: 'LT',   desc: 'Litro' },
+  { cod: 'MTR', sym: 'M',    desc: 'Metro' },
+  { cod: 'FOT', sym: 'PIE',  desc: 'Pies' },
+  { cod: 'INH', sym: 'INCH', desc: 'Pulgadas' },
+  { cod: 'YRD', sym: 'YD',   desc: 'Yarda' },
+  { cod: 'TNE', sym: 'TNL',  desc: 'Toneladas' },
+  { cod: 'DZN', sym: 'DOC',  desc: 'Docena' },
+  { cod: 'QD',  sym: '1/4 DOC', desc: 'Cuarto de docena' },
+  { cod: 'PK',  sym: 'PQT',  desc: 'Paquete' },
+  { cod: 'MTQ', sym: 'M3',   desc: 'Metro cúbico' },
+  { cod: 'HD',  sym: '1/2 DOC', desc: 'Media docena' },
+  { cod: 'PR',  sym: 'PAR',  desc: 'Par' },
+  { cod: 'JG',  sym: 'JARR', desc: 'Jarra' },
+  { cod: 'JR',  sym: 'FCO',  desc: 'Frasco' },
+  { cod: 'KT',  sym: 'KIT',  desc: 'Kit' },
+  { cod: 'CH',  sym: 'ENV',  desc: 'Envase' },
+  { cod: 'AV',  sym: 'CAPS', desc: 'Cápsula' },
+  { cod: 'CT',  sym: 'CTON', desc: 'Cartón' },
+  { cod: 'CY',  sym: 'CIL',  desc: 'Cilindro' },
+  { cod: 'BE',  sym: 'FARD', desc: 'Fardo' },
+  { cod: 'BG',  sym: 'BOLS', desc: 'Bolsa' },
+  { cod: 'BJ',  sym: 'BALD', desc: 'Balde' },
+  { cod: 'SET', sym: 'JGO',  desc: 'Juego' },
+  { cod: 'BLL', sym: 'BRL',  desc: 'Barril' },
+  { cod: 'RM',  sym: 'RESM', desc: 'Resma' },
+  { cod: 'BO',  sym: 'BOT',  desc: 'Botellas' },
+  { cod: 'SA',  sym: 'SCO',  desc: 'Saco' },
+  { cod: 'BT',  sym: 'TORN', desc: 'Tornillo' },
+  { cod: 'C62', sym: 'PZ',   desc: 'Piezas' },
+  { cod: 'U2',  sym: 'BLIST', desc: 'Tableta o blister' },
+  { cod: 'CA',  sym: 'LT',   desc: 'Latas' },
+  { cod: 'CEN', sym: 'CTO',  desc: 'Centenar o ciento' },
+  { cod: 'CMT', sym: 'CM',   desc: 'Centímetro' },
+  { cod: 'CMK', sym: 'CM2',  desc: 'Centímetro cuadrado' },
+  { cod: 'CMQ', sym: 'CM3',  desc: 'Centímetro cúbico' },
+  { cod: 'DZP', sym: 'DOC2', desc: 'Docena de paquetes' },
+  { cod: 'FTK', sym: 'PIE2', desc: 'Pies cuadrados' },
+  { cod: 'FTQ', sym: 'PIE3', desc: 'Pies cúbicos' },
+  { cod: 'GLI', sym: 'GL',   desc: 'Galón inglés' },
+  { cod: 'HT',  sym: '1/2 H', desc: 'Media hora' },
+  { cod: 'KTM', sym: 'KM',   desc: 'Kilómetro' },
+  { cod: 'KWH', sym: 'KWxH', desc: 'Kilovatio hora' },
+  { cod: 'MWH', sym: 'MWxH', desc: 'Megavatio hora' },
+  { cod: 'LBR', sym: 'LB',   desc: 'Libras' },
+  { cod: 'LEF', sym: 'HOJA', desc: 'Hoja' },
+  { cod: 'MGM', sym: 'MG',   desc: 'Miligramos' },
+  { cod: 'MIL', sym: 'MIL',  desc: 'Millar' },
+  { cod: 'MLT', sym: 'ML',   desc: 'Mililitro' },
+  { cod: 'MMT', sym: 'MM',   desc: 'Milímetro' },
+  { cod: 'MMK', sym: 'MM2',  desc: 'Milímetro cuadrado' },
+  { cod: 'MMQ', sym: 'MM3',  desc: 'Milímetro cúbico' },
+  { cod: 'MTK', sym: 'M2',   desc: 'Metro cuadrado' },
+  { cod: 'ONZ', sym: 'ONZ',  desc: 'Onzas' },
+  { cod: 'PF',  sym: 'PAL',  desc: 'Paletas' },
+  { cod: 'PG',  sym: 'PLAC', desc: 'Placas' },
+  { cod: 'RD',  sym: 'VAR',  desc: 'Varilla' },
+  { cod: 'RL',  sym: 'CRR',  desc: 'Carrete' },
+  { cod: 'SEC', sym: 'SEG',  desc: 'Segundo' },
+  { cod: 'ST',  sym: 'PLGO', desc: 'Pliego' },
+  { cod: 'TU',  sym: 'TB',   desc: 'Tubos' },
+  { cod: 'UM',  sym: 'MILL', desc: 'Millón' },
+];
+
 export default function ItemsTable({ items, onChange, moneda = 'PEN' }) {
   const simbolo = moneda === 'USD' ? '$' : moneda === 'EUR' ? '€' : 'S/';
 
@@ -53,7 +121,7 @@ export default function ItemsTable({ items, onChange, moneda = 'PEN' }) {
             <thead>
               <tr>
                 <th>Descripción</th>
-                <th className="w-20">Und</th>
+                <th className="w-32">Und</th>
                 <th className="w-24 text-right">Cantidad</th>
                 <th className="w-28 text-right">Precio Unit.</th>
                 <th className="w-28">IGV</th>
@@ -75,11 +143,15 @@ export default function ItemsTable({ items, onChange, moneda = 'PEN' }) {
                       {it.codigo && <div className="text-xs text-slate-400 px-2 font-semibold mt-0.5">{it.codigo}</div>}
                     </td>
                     <td>
-                      <input
-                        className="input-inline font-mono text-xs"
-                        value={it.unidad || ''}
+                      <select
+                        className="input-inline text-xs"
+                        value={it.unidad || 'NIU'}
                         onChange={(e) => updateItem(idx, 'unidad', e.target.value)}
-                      />
+                      >
+                        {SUNAT_UNITS.map((u) => (
+                          <option key={u.cod} value={u.cod}>{u.cod} - {u.sym}</option>
+                        ))}
+                      </select>
                     </td>
                     <td>
                       <input

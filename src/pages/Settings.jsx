@@ -82,10 +82,25 @@ export default function Settings() {
             onChange={(e) => setConfig({ ...config, api_secret: e.target.value })}
             placeholder="Tu api_secret"
           />
-          <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
-            <AlertTriangle className="w-3 h-3" /> Se guarda en localStorage de tu navegador.
+        </div>
+
+        <div className="pt-2 border-t border-slate-100">
+          <label className="label">Token api.json.pe <span className="text-slate-400 font-normal">(consulta RUC / DNI)</span></label>
+          <input
+            type="password"
+            className="input font-mono"
+            value={config.jsonpe_token || ''}
+            onChange={(e) => setConfig({ ...config, jsonpe_token: e.target.value })}
+            placeholder="Bearer token de api.json.pe"
+          />
+          <p className="text-xs text-slate-500 mt-1">
+            Obtén tu token en <strong>api.json.pe</strong>. Se usa para buscar datos de RUC (SUNAT) y DNI (RENIEC).
           </p>
         </div>
+
+        <p className="text-xs text-slate-500 flex items-center gap-1">
+          <AlertTriangle className="w-3 h-3" /> Las credenciales se guardan en localStorage de tu navegador.
+        </p>
 
         <div className="flex gap-2 pt-4 items-center">
           <button onClick={handleSave} className="btn-primary flex items-center gap-2">
