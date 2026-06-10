@@ -32,13 +32,15 @@ export default function Login() {
       <div style={{ width: '100%', maxWidth: '400px', borderRadius: '0.75rem', overflow: 'hidden', border: '1px solid #d0d5dd', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
 
         {/* Cabecera navy */}
-        <div style={{ background: '#002060', padding: '2rem', textAlign: 'center' }}>
-          <div style={{ width: '60px', height: '60px', borderRadius: '50%', border: '2px solid rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
-            <ShieldCheck style={{ width: '32px', height: '32px', color: 'white' }} />
+        <div style={{ background: '#002060', padding: '1.25rem 1.5rem', display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
+          <div style={{ width: '44px', height: '44px', borderRadius: '50%', border: '2px solid rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <ShieldCheck style={{ width: '24px', height: '24px', color: 'white' }} />
           </div>
-          <div style={{ color: 'white', fontWeight: '800', fontSize: '1.25rem', letterSpacing: '0.06em' }}>SUNAT</div>
-          <div style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.75rem', marginTop: '0.3rem', lineHeight: 1.5 }}>
-            Superintendencia Nacional de Aduanas<br />y de Administración Tributaria
+          <div>
+            <div style={{ color: 'white', fontWeight: '800', fontSize: '1.1rem', letterSpacing: '0.06em', lineHeight: 1.2 }}>SUNAT</div>
+            <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.68rem', marginTop: '0.2rem', lineHeight: 1.4 }}>
+              Superintendencia Nacional de Aduanas<br />y de Administración Tributaria
+            </div>
           </div>
         </div>
 
