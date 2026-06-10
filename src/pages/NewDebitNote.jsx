@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { api } from '../api/client.js';
 import ProductPicker from '../components/ProductPicker.jsx';
-import ClientPicker from '../components/ClientPicker.jsx';
 import ItemsTable from '../components/ItemsTable.jsx';
 import ResponseModal from '../components/ResponseModal.jsx';
 import PdfFormatPicker from '../components/PdfFormatPicker.jsx';
@@ -39,7 +38,6 @@ export default function NewDebitNote() {
   const [cliente, setCliente] = useState(null);
   const [items, setItems] = useState([]);
   const [showProductPicker, setShowProductPicker] = useState(false);
-  const [showClientPicker, setShowClientPicker] = useState(false);
   const [sending, setSending] = useState(false);
   const [response, setResponse] = useState(null);
   const [error, setError] = useState(null);
@@ -160,9 +158,8 @@ export default function NewDebitNote() {
           <h2 className="section-title">Cliente</h2>
           <ClientSelector
             cliente={cliente}
-            onOpenPicker={() => setShowClientPicker(true)}
-            onClear={() => setCliente(null)}
-            placeholder="Cliente del documento original..."
+            onChange={setCliente}
+            placeholder="Ingrese RUC o DNI del cliente..."
           />
         </div>
 
@@ -186,7 +183,7 @@ export default function NewDebitNote() {
       </form>
 
       {showProductPicker && <ProductPicker onSelect={addProduct} onClose={() => setShowProductPicker(false)} />}
-      {showClientPicker && <ClientPicker onSelect={setCliente} onClose={() => setShowClientPicker(false)} />}
+
       {(response || error) && (
         <ResponseModal response={response} error={error} tipo="notas-debito" pdfFormat={pdfFormat} onClose={() => { setResponse(null); setError(null); }} />
       )}

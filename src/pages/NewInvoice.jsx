@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { api } from '../api/client.js';
 import ProductPicker from '../components/ProductPicker.jsx';
-import ClientPicker from '../components/ClientPicker.jsx';
 import ItemsTable from '../components/ItemsTable.jsx';
 import ResponseModal from '../components/ResponseModal.jsx';
 import PdfFormatPicker from '../components/PdfFormatPicker.jsx';
@@ -22,7 +21,6 @@ export default function NewInvoice() {
   const [cliente, setCliente] = useState(null);
   const [items, setItems] = useState([]);
   const [showProductPicker, setShowProductPicker] = useState(false);
-  const [showClientPicker, setShowClientPicker] = useState(false);
   const [sending, setSending] = useState(false);
   const [response, setResponse] = useState(null);
   const [error, setError] = useState(null);
@@ -222,9 +220,8 @@ export default function NewInvoice() {
           <h2 className="section-title">Cliente</h2>
           <ClientSelector
             cliente={cliente}
-            onOpenPicker={() => setShowClientPicker(true)}
-            onClear={() => setCliente(null)}
-            placeholder="Seleccionar cliente (RUC)..."
+            onChange={setCliente}
+            placeholder="Ingrese RUC del cliente..."
           />
           {cliente?.direccion && (
             <p className="text-xs text-slate-500 mt-2 pl-1">{cliente.direccion}</p>
@@ -264,7 +261,7 @@ export default function NewInvoice() {
       </form>
 
       {showProductPicker && <ProductPicker onSelect={addProduct} onClose={() => setShowProductPicker(false)} />}
-      {showClientPicker && <ClientPicker onSelect={setCliente} onClose={() => setShowClientPicker(false)} />}
+
       {(response || error) && (
         <ResponseModal
           response={response}

@@ -1,58 +1,85 @@
-import { Search, User, X } from 'lucide-react';
+import { useState } from 'react';
+import { api } from '../api/client.js';
+import { Search, X, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 
-/**
- * Selector compacto de cliente — se comporta como un input.
- * Muestra el cliente seleccionado inline con acciones de buscar/limpiar.
- */
-export default function ClientSelector({ cliente, onOpenPicker, onClear, placeholder = 'Seleccionar cliente...' }) {
-  return (
-    <div
-      className={`
-        flex items-center gap-2 w-full px-3.5 py-2.5 rounded-xl
-        transition-all duration-150 cursor-pointer
-        ${cliente ? 'bg-blue-50 hover:bg-blue-100/60' : 'bg-slate-100 hover:bg-slate-200/60'}
-      `}
-      onClick={onOpenPicker}
-    >
-      <span className={`flex-shrink-0 ${cliente ? 'text-blue-600' : 'text-slate-400'}`}>
-        <User className="w-[18px] h-[18px]" />
-      </span>
+export default function ClientSelector({ cliente, onChange, placeholder = 'Ingrese RUC o DNI...' }) {
+  const [query, setQuery] = useState('');
+  const [searching, setSearching] = useState(false);
+  const [error, setError] = useState(null);
 
-      {cliente ? (
-        <div className="flex-1 min-w-0 flex items-center gap-2 flex-wrap sm:flex-nowrap">
-          <span className="badge bg-slate-100 text-slate-700 font-mono text-[11px] flex-shrink-0">
-            {cliente.tipo_doc === '6' ? 'RUC' : cliente.tipo_doc === '1' ? 'DNI' : cliente.tipo_doc === '0' ? 'S/D' : cliente.tipo_doc}
-            {' '}
-            {cliente.num_doc}
-          </span>
-          <span className="text-sm font-semibold text-slate-900 truncate">
-            {cliente.razon_social}
-          </span>
+  async function buscar() {
+    const numero = query.trim();
+    if (!/^\d{8,11}$/.test(numero)) {
+      setError('Ingresa un DNI (8 dígitos) o RUC (11 dígitos).');
+      return;
+    }
+    setSearching(true);
+    setError(null);
+    try {
+      const res = await api.buscarDocumento(numero.length === 11 ? '6' : '1', numero);
+      onChange(res.data);
+      setQuery('');
+    } catch (e) {
+      setError(e.message || 'No se encontró el documento.');
+    } finally {
+      setSearching(false);
+    }
+  }
+
+  if (cliente) {
+    const tipoLabel = cliente.tipo_doc === '6' ? 'RUC' : cliente.tipo_doc === '1' ? 'DNI' : 'S/D';
+    return (
+      <div className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-blue-50 border border-blue-100">
+        <CheckCircle2 className="w-5 h-5 text-blue-500 flex-shrink-0" />
+        <div className="flex-1 min-w-0">
+          <div className="text-[11px] font-bold font-mono text-slate-500 uppercase tracking-wide">
+            {tipoLabel} {cliente.num_doc}
+          </div>
+          <div className="text-sm font-semibold text-slate-900 truncate">{cliente.razon_social}</div>
+          {cliente.direccion && (
+            <div className="text-xs text-slate-400 truncate">{cliente.direccion}</div>
+          )}
         </div>
-      ) : (
-        <span className="flex-1 text-sm text-slate-400 font-normal">{placeholder}</span>
-      )}
-
-      <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
-        {cliente && onClear && (
-          <button
-            type="button"
-            onClick={onClear}
-            className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors"
-            title="Limpiar"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        )}
         <button
           type="button"
-          onClick={onOpenPicker}
-          className="p-1 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-          title="Buscar cliente"
+          onClick={() => onChange(null)}
+          className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
+          title="Cambiar cliente"
         >
-          <Search className="w-4 h-4" />
+          <X className="w-4 h-4" />
         </button>
       </div>
+    );
+  }
+
+  return (
+    <div className="space-y-1.5">
+      <div className="flex gap-2">
+        <input
+          type="text"
+          className="input flex-1"
+          value={query}
+          onChange={(e) => { setQuery(e.target.value.replace(/\D/g, '')); setError(null); }}
+          onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); buscar(); } }}
+          placeholder={placeholder}
+          maxLength={11}
+        />
+        <button
+          type="button"
+          onClick={buscar}
+          disabled={searching}
+          className="btn-secondary flex items-center gap-1.5 whitespace-nowrap"
+        >
+          {searching
+            ? <><Loader2 className="w-4 h-4 animate-spin" /> Buscando...</>
+            : <><Search className="w-4 h-4" /> Buscar</>}
+        </button>
+      </div>
+      {error && (
+        <div className="flex items-center gap-1.5 text-sm text-red-600 px-0.5">
+          <AlertCircle className="w-4 h-4 flex-shrink-0" /> {error}
+        </div>
+      )}
     </div>
   );
 }

@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { api } from '../api/client.js';
 import ProductPicker from '../components/ProductPicker.jsx';
-import ClientPicker from '../components/ClientPicker.jsx';
 import ResponseModal from '../components/ResponseModal.jsx';
 import PdfFormatPicker from '../components/PdfFormatPicker.jsx';
 import { Truck, Plus, Loader2, Check, Car, X } from 'lucide-react';
@@ -46,7 +45,6 @@ export default function NewDispatchGuide() {
   const [destinatario, setDestinatario] = useState(null);
   const [items, setItems] = useState([]);
   const [showProductPicker, setShowProductPicker] = useState(false);
-  const [showClientPicker, setShowClientPicker] = useState(false);
   const [sending, setSending] = useState(false);
   const [response, setResponse] = useState(null);
   const [error, setError] = useState(null);
@@ -170,9 +168,8 @@ export default function NewDispatchGuide() {
           <h2 className="section-title">Destinatario</h2>
           <ClientSelector
             cliente={destinatario}
-            onOpenPicker={() => setShowClientPicker(true)}
-            onClear={() => setDestinatario(null)}
-            placeholder="Seleccionar destinatario (RUC o DNI)..."
+            onChange={setDestinatario}
+            placeholder="Ingrese RUC o DNI del destinatario..."
           />
         </div>
 
@@ -316,7 +313,7 @@ export default function NewDispatchGuide() {
       </form>
 
       {showProductPicker && <ProductPicker onSelect={addProduct} onClose={() => setShowProductPicker(false)} />}
-      {showClientPicker && <ClientPicker onSelect={setDestinatario} onClose={() => setShowClientPicker(false)} />}
+
       {(response || error) && (
         <ResponseModal response={response} error={error} tipo="guias-remision" pdfFormat={pdfFormat} onClose={() => { setResponse(null); setError(null); }} />
       )}

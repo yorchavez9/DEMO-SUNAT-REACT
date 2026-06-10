@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { api } from '../api/client.js';
 import ProductPicker from '../components/ProductPicker.jsx';
-import ClientPicker from '../components/ClientPicker.jsx';
 import ItemsTable from '../components/ItemsTable.jsx';
 import ResponseModal from '../components/ResponseModal.jsx';
 import PdfFormatPicker from '../components/PdfFormatPicker.jsx';
@@ -26,7 +25,6 @@ export default function NewBoleta() {
   });
   const [items, setItems] = useState([]);
   const [showProductPicker, setShowProductPicker] = useState(false);
-  const [showClientPicker, setShowClientPicker] = useState(false);
   const [sending, setSending] = useState(false);
   const [response, setResponse] = useState(null);
   const [error, setError] = useState(null);
@@ -191,9 +189,8 @@ export default function NewBoleta() {
           <h2 className="section-title">Cliente</h2>
           <ClientSelector
             cliente={cliente}
-            onOpenPicker={() => setShowClientPicker(true)}
-            onClear={() => setCliente({ tipo_doc: '0', num_doc: '-', razon_social: 'CLIENTES VARIOS' })}
-            placeholder="Seleccionar cliente..."
+            onChange={setCliente}
+            placeholder="Ingrese RUC o DNI del cliente..."
           />
           <div className="flex items-center justify-between mt-3 gap-2 flex-wrap">
             <p className="text-xs text-slate-500">
@@ -255,7 +252,7 @@ export default function NewBoleta() {
       </form>
 
       {showProductPicker && <ProductPicker onSelect={addProduct} onClose={() => setShowProductPicker(false)} />}
-      {showClientPicker && <ClientPicker onSelect={setCliente} onClose={() => setShowClientPicker(false)} />}
+
       {(response || error) && (
         <ResponseModal response={response} error={error} tipo="boletas" pdfFormat={pdfFormat} onClose={() => { setResponse(null); setError(null); }} />
       )}
