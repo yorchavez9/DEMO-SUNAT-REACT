@@ -271,7 +271,7 @@ function ActionsCell({ d, tipo, config, downloading, descargar, setDocNota, setD
   const ref = useRef(null);
   const estado = d.sunat?.estado ?? d.sunat_status ?? null;
   const canAnular = !!TIPO_DOC_MAP[tipo] && estado !== 'anulado' && estado !== 'anulacion_en_proceso';
-  const canNota = tipo === 'facturas';
+  const canNota = tipo === 'facturas' && estado !== 'anulado' && estado !== 'anulacion_en_proceso';
 
   useEffect(() => {
     if (!open) return;

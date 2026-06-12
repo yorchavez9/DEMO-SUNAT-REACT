@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { api } from '../api/client.js';
-import { Search, X, Loader2, CheckCircle2, AlertCircle, UserPlus } from 'lucide-react';
+import { Search, X, Loader2, CheckCircle2, AlertCircle, UserPlus, AlertTriangle } from 'lucide-react';
 
 const TIPOS_DOC = [
   { cod: '6', label: 'RUC' },
@@ -18,6 +18,7 @@ export default function ClientSelector({ cliente, onChange, placeholder = 'Ingre
   const [error, setError] = useState(null);
   const [showManual, setShowManual] = useState(false);
   const [manual, setManual] = useState({ ...MANUAL_EMPTY });
+  const [manualErrors, setManualErrors] = useState({});
 
   async function buscar() {
     const numero = query.trim();
@@ -38,15 +39,20 @@ export default function ClientSelector({ cliente, onChange, placeholder = 'Ingre
     }
   }
 
-  function confirmarManual(e) {
-    e.preventDefault();
+  function confirmarManual() {
+    const errs = {};
+    if (!manual.num_doc.trim()) errs.num_doc = 'Requerido';
+    if (!manual.razon_social.trim()) errs.razon_social = 'Requerido';
+    if (Object.keys(errs).length > 0) { setManualErrors(errs); return; }
     onChange({ ...manual });
     setShowManual(false);
     setManual({ ...MANUAL_EMPTY });
+    setManualErrors({});
   }
 
   function abrirManual() {
     setManual({ ...MANUAL_EMPTY });
+    setManualErrors({});
     setShowManual(true);
   }
 
@@ -137,7 +143,8 @@ export default function ClientSelector({ cliente, onChange, placeholder = 'Ingre
               </button>
             </div>
 
-            <form onSubmit={confirmarManual} className="p-4 space-y-3">
+            {/* div en lugar de form para evitar anidamiento con el form padre */}
+            <div className="p-4 space-y-3">
               <div className="flex gap-3">
                 <div style={{ flex: '0 0 auto', width: '11rem' }}>
                   <label className="label">Tipo de doc.</label>
@@ -154,25 +161,27 @@ export default function ClientSelector({ cliente, onChange, placeholder = 'Ingre
                 <div className="flex-1">
                   <label className="label">N° de documento</label>
                   <input
-                    className="input font-mono"
+                    className={`input font-mono ${manualErrors.num_doc ? 'border-red-400' : ''}`}
                     value={manual.num_doc}
-                    onChange={(e) => setManual({ ...manual, num_doc: e.target.value.replace(/\D/g, '') })}
+                    onChange={(e) => { setManual({ ...manual, num_doc: e.target.value.replace(/\D/g, '') }); setManualErrors((p) => ({ ...p, num_doc: null })); }}
                     placeholder="20xxxxxxxxx"
                     maxLength={11}
-                    required
+                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); confirmarManual(); } }}
                   />
+                  {manualErrors.num_doc && <p className="text-xs text-red-500 mt-1">{manualErrors.num_doc}</p>}
                 </div>
               </div>
 
               <div>
                 <label className="label">Razón social / Nombre</label>
                 <input
-                  className="input"
+                  className={`input ${manualErrors.razon_social ? 'border-red-400' : ''}`}
                   value={manual.razon_social}
-                  onChange={(e) => setManual({ ...manual, razon_social: e.target.value.toUpperCase() })}
+                  onChange={(e) => { setManual({ ...manual, razon_social: e.target.value.toUpperCase() }); setManualErrors((p) => ({ ...p, razon_social: null })); }}
                   placeholder="EMPRESA S.A.C."
-                  required
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); confirmarManual(); } }}
                 />
+                {manualErrors.razon_social && <p className="text-xs text-red-500 mt-1">{manualErrors.razon_social}</p>}
               </div>
 
               <div>
@@ -182,22 +191,23 @@ export default function ClientSelector({ cliente, onChange, placeholder = 'Ingre
                   value={manual.direccion}
                   onChange={(e) => setManual({ ...manual, direccion: e.target.value })}
                   placeholder="Av. Example 123, Lima"
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); confirmarManual(); } }}
                 />
               </div>
 
               <div className="flex gap-2 pt-2">
-                <button type="submit" className="btn-primary flex items-center gap-1.5">
+                <button type="button" onClick={confirmarManual} className="btn-primary flex items-center gap-1.5">
                   <CheckCircle2 className="w-4 h-4" /> Confirmar
                 </button>
                 <button
                   type="button"
-                  onClick={() => setShowManual(false)}
+                  onClick={() => { setShowManual(false); setManualErrors({}); }}
                   className="btn-secondary"
                 >
                   Cancelar
                 </button>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}

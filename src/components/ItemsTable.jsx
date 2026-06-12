@@ -84,20 +84,23 @@ export default function ItemsTable({ items, onChange, moneda = 'PEN', showDescue
     onChange(items.filter((_, i) => i !== idx));
   }
 
+  // El descuento (cod_tipo "00") se aplica sobre la BASE sin IGV, no sobre el precio final.
+  // precio_unitario viene con IGV incluido → base = precio / 1.18
   const totales = items.reduce((acc, it) => {
     const cantidad = parseFloat(it.cantidad) || 0;
-    const precio = parseFloat(it.precio_unitario) || 0;
-    const descuento = showDescuentos ? (parseFloat(it.descuento_monto) || 0) : 0;
-    const subtotal = cantidad * precio - descuento;
-    const afe = it.tip_afe_igv || '10';
+    const precio   = parseFloat(it.precio_unitario) || 0;
+    const desc     = showDescuentos ? (parseFloat(it.descuento_monto) || 0) : 0;
+    const afe      = it.tip_afe_igv || '10';
     if (afe === '10') {
-      const bg = subtotal / 1.18;
-      acc.baseGravada += bg;
-      acc.igv += subtotal - bg;
-    } else if (afe === '20' || afe === '30') {
-      acc.baseNoGravada += subtotal;
+      const netBase = Math.max(0, (precio / 1.18) * cantidad - desc);
+      acc.baseGravada += netBase;
+      acc.igv         += netBase * 0.18;
+      acc.subtotal    += netBase * 1.18;
+    } else {
+      const net = Math.max(0, precio * cantidad - desc);
+      acc.baseNoGravada += net;
+      acc.subtotal      += net;
     }
-    acc.subtotal += subtotal;
     return acc;
   }, { subtotal: 0, baseGravada: 0, baseNoGravada: 0, igv: 0 });
 
@@ -117,16 +120,20 @@ export default function ItemsTable({ items, onChange, moneda = 'PEN', showDescue
                 <th className="w-24 text-right">Cantidad</th>
                 <th className="w-28 text-right">Precio Unit.</th>
                 <th className="w-28">IGV</th>
-                {showDescuentos && <th className="w-24 text-right text-orange-600">Desc.</th>}
+                {showDescuentos && <th className="w-24 text-right text-orange-600" title="Descuento sobre el valor base sin IGV">Desc. (s/IGV)</th>}
                 <th className="w-28 text-right">Total</th>
                 <th className="w-12"></th>
               </tr>
             </thead>
             <tbody>
               {items.map((it, idx) => {
-                const subtotal = (parseFloat(it.cantidad) || 0) * (parseFloat(it.precio_unitario) || 0);
-                const descuento = showDescuentos ? (parseFloat(it.descuento_monto) || 0) : 0;
-                const total = subtotal - descuento;
+                const cantidad = parseFloat(it.cantidad) || 0;
+                const precio   = parseFloat(it.precio_unitario) || 0;
+                const desc     = showDescuentos ? (parseFloat(it.descuento_monto) || 0) : 0;
+                const afe      = it.tip_afe_igv || '10';
+                const total    = afe === '10'
+                  ? Math.max(0, (precio / 1.18) * cantidad - desc) * 1.18
+                  : Math.max(0, precio * cantidad - desc);
                 return (
                   <tr key={idx}>
                     <td>
