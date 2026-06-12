@@ -6,6 +6,16 @@ import {
 
 const TODAY = new Date().toISOString().split('T')[0];
 
+function normalizeAnulacion(a) {
+  if (!a) return a;
+  return {
+    ...a,
+    estado_sunat: a.sunat_status ?? a.estado_sunat ?? a.sunat?.estado ?? a.estado ?? null,
+    sunat_description: a.sunat_description ?? a.sunat?.descripcion ?? null,
+    ticket: a.ticket ?? a.sunat?.ticket ?? null,
+  };
+}
+
 const TIPOS_DOC = [
   { cod: '01', label: 'Factura' },
   { cod: '07', label: 'Nota de Crédito' },
@@ -25,7 +35,8 @@ export default function Anulaciones() {
     setError(null);
     try {
       const res = await api.listarAnulaciones();
-      setItems(res.data || []);
+      const raw = Array.isArray(res.data) ? res.data : (res.data?.datos || res.data?.data || []);
+      setItems(raw.map(normalizeAnulacion));
     } catch (e) {
       setError(e.message);
     } finally {
@@ -38,8 +49,13 @@ export default function Anulaciones() {
   async function refrescar(id) {
     setRefreshing(id);
     try {
-      await api.estadoAnulacion(id);
-      await loadAnulaciones();
+      const res = await api.estadoAnulacion(id);
+      const updated = normalizeAnulacion(res.data || res);
+      setItems((prev) =>
+        prev.map((item) =>
+          item.id === id ? { ...item, ...updated } : item
+        )
+      );
     } catch (e) {
       alert('Error al refrescar: ' + e.message);
     } finally {
@@ -119,7 +135,14 @@ export default function Anulaciones() {
                     <td className="font-mono font-bold text-slate-900">{a.identifier}</td>
                     <td className="text-slate-600">{(a.fecha_generacion || a.fecha_referencia || '').slice(0, 10) || '—'}</td>
                     <td className="text-right font-bold">{a.total_documentos ?? a.detalles?.length ?? '—'}</td>
-                    <td><EstadoBadge estado={a.estado_sunat} /></td>
+                    <td>
+                      <EstadoBadge estado={a.estado_sunat} />
+                      {a.sunat_description && (
+                        <div className="text-[10px] text-slate-400 mt-0.5 max-w-[180px] truncate" title={a.sunat_description}>
+                          {a.sunat_description}
+                        </div>
+                      )}
+                    </td>
                     <td className="text-xs font-mono text-slate-500">{a.ticket || '—'}</td>
                     <td>
                       <div className="flex items-center gap-1">
@@ -208,7 +231,7 @@ function NuevaAnulacionModal({ onClose, onSuccess }) {
       detalles: detalles.map((d) => ({
         tipo_documento: d.tipo_documento,
         serie: d.serie.trim().toUpperCase(),
-        correlativo: d.correlativo.trim(),
+        correlativo: String(parseInt(d.correlativo.trim(), 10) || d.correlativo.trim()),
         motivo: d.motivo.trim(),
       })),
     };

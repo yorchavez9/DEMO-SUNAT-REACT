@@ -24,12 +24,27 @@ export default function NewBoleta() {
     razon_social: 'CLIENTES VARIOS',
   });
   const [items, setItems] = useState([]);
+  const [descuentosGlobales, setDescuentosGlobales] = useState([]);
   const [showProductPicker, setShowProductPicker] = useState(false);
   const [sending, setSending] = useState(false);
   const [response, setResponse] = useState(null);
   const [error, setError] = useState(null);
   const [pdfFormat, setPdfFormat] = useState('ticket-80');
   const [cuotas, setCuotas] = useState([]);
+
+  const simbolo = form.tipo_moneda === 'USD' ? '$' : 'S/';
+
+  function addDescGlobal() {
+    setDescuentosGlobales([...descuentosGlobales, { cod_tipo: '02', monto: '' }]);
+  }
+  function updateDescGlobal(i, field, value) {
+    const next = [...descuentosGlobales];
+    next[i] = { ...next[i], [field]: value };
+    setDescuentosGlobales(next);
+  }
+  function removeDescGlobal(i) {
+    setDescuentosGlobales(descuentosGlobales.filter((_, idx) => idx !== i));
+  }
 
   function calcCuotas(count) {
     const total = items.reduce((s, it) => s + parseFloat(it.cantidad || 0) * parseFloat(it.precio_unitario || 0), 0);
@@ -89,11 +104,18 @@ export default function NewBoleta() {
         razon_social: cliente.razon_social,
         direccion: cliente.direccion || '',
       },
-      items: items.map((it) => ({
-        ...it,
-        cantidad: parseFloat(it.cantidad),
-        precio_unitario: parseFloat(it.precio_unitario),
-      })),
+      items: items.map((it) => {
+        const item = { ...it, cantidad: parseFloat(it.cantidad), precio_unitario: parseFloat(it.precio_unitario) };
+        const desc = parseFloat(it.descuento_monto) || 0;
+        if (desc > 0) item.descuentos = [{ cod_tipo: '00', monto: parseFloat(desc.toFixed(2)) }];
+        delete item.descuento_monto;
+        return item;
+      }),
+      ...(descuentosGlobales.filter((d) => parseFloat(d.monto) > 0).length > 0 ? {
+        descuentos_globales: descuentosGlobales
+          .filter((d) => parseFloat(d.monto) > 0)
+          .map((d) => ({ cod_tipo: d.cod_tipo, monto: parseFloat(parseFloat(d.monto).toFixed(2)) })),
+      } : {}),
     };
 
     setSending(true);
@@ -104,6 +126,7 @@ export default function NewBoleta() {
       const res = await api.crearBoleta(payload);
       setResponse(res);
       setItems([]);
+      setDescuentosGlobales([]);
       setForm({ ...form, observacion: '' });
     } catch (e) {
       setError(e);
@@ -213,7 +236,56 @@ export default function NewBoleta() {
               <Plus className="w-4 h-4" /> Agregar producto
             </button>
           </div>
-          <ItemsTable items={items} onChange={setItems} moneda={form.tipo_moneda} />
+          <ItemsTable items={items} onChange={setItems} moneda={form.tipo_moneda} showDescuentos />
+        </div>
+
+        {/* Descuentos globales */}
+        <div className="card">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <h2 className="section-title mb-0">
+                Descuentos globales
+                <span className="text-slate-400 text-xs font-normal ml-2">(opcional)</span>
+              </h2>
+              <p className="text-xs text-slate-500 mt-1">Aplicados al total del documento, no por ítem.</p>
+            </div>
+            <button type="button" onClick={addDescGlobal} className="btn-secondary text-sm flex items-center gap-2">
+              <Plus className="w-4 h-4" /> Agregar
+            </button>
+          </div>
+          {descuentosGlobales.length === 0 ? (
+            <p className="text-sm text-slate-400">Sin descuentos globales.</p>
+          ) : (
+            <div className="space-y-2">
+              {descuentosGlobales.map((d, i) => (
+                <div key={i} className="flex gap-2 items-end">
+                  <div className="flex-1">
+                    <label className="label">Tipo</label>
+                    <select className="input" value={d.cod_tipo} onChange={(e) => updateDescGlobal(i, 'cod_tipo', e.target.value)}>
+                      <option value="02">02 – Descuento global (afecta base IGV)</option>
+                      <option value="03">03 – Descuento que NO afecta base IGV</option>
+                    </select>
+                  </div>
+                  <div className="w-36">
+                    <label className="label">Monto ({simbolo})</label>
+                    <input
+                      type="number" min="0.01" step="0.01"
+                      className="input text-right"
+                      value={d.monto}
+                      onChange={(e) => updateDescGlobal(i, 'monto', e.target.value)}
+                      placeholder="0.00"
+                    />
+                  </div>
+                  <button type="button" onClick={() => removeDescGlobal(i)} className="mb-0.5 p-2 text-red-500 hover:text-red-700 flex-shrink-0">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+              <p className="text-xs text-slate-500 pt-2 border-t border-slate-100 mt-2">
+                Total descuentos globales: <strong>{simbolo} {descuentosGlobales.reduce((s, d) => s + (parseFloat(d.monto) || 0), 0).toFixed(2)}</strong>
+              </p>
+            </div>
+          )}
         </div>
 
         <div className="card">

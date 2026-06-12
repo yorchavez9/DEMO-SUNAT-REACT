@@ -16,6 +16,8 @@ import {
   FileStack,
   LogOut,
   Ban,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from 'lucide-react';
 
 const LINK_CLASS = ({ isActive }) =>
@@ -34,6 +36,7 @@ export default function Layout() {
   const logged = isLoggedIn();
   const session = getSession();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   // Sin sesión → login
   useEffect(() => {
@@ -66,13 +69,32 @@ export default function Layout() {
         />
       )}
 
+      {/* Desktop spacer — pushes main content when sidebar is visible */}
+      <div
+        className={`hidden lg:block flex-shrink-0 transition-all duration-300 ease-in-out ${
+          sidebarCollapsed ? 'w-0' : 'w-72'
+        }`}
+      />
+
+      {/* Botón flotante para re-abrir el sidebar en desktop */}
+      {sidebarCollapsed && (
+        <button
+          onClick={() => setSidebarCollapsed(false)}
+          title="Mostrar menú"
+          className="hidden lg:flex fixed top-4 left-4 z-30 p-2.5 bg-white rounded-xl shadow-md border border-slate-200 text-slate-600 hover:text-blue-600 hover:border-blue-200 transition-colors"
+        >
+          <PanelLeftOpen className="w-5 h-5" />
+        </button>
+      )}
+
       {/* Sidebar */}
       <aside
         className={`
-          fixed lg:sticky top-0 left-0 z-40 w-72 h-screen bg-white flex flex-col
+          fixed top-0 left-0 z-40 w-72 h-screen bg-white flex flex-col
+          border-r border-slate-100 shadow-sm
           transform transition-transform duration-300 ease-in-out
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-          lg:translate-x-0
+          ${sidebarCollapsed ? 'lg:-translate-x-full' : 'lg:translate-x-0'}
         `}
       >
         <div className="px-5 py-5 flex items-center justify-between">
@@ -85,11 +107,20 @@ export default function Layout() {
             </h1>
             <p className="text-xs text-slate-500 mt-1 font-medium">Sistema ejemplo de facturación</p>
           </div>
+          {/* Cerrar en móvil */}
           <button
             onClick={() => setSidebarOpen(false)}
             className="lg:hidden text-slate-400 hover:text-slate-900 p-1"
           >
             <X className="w-5 h-5" />
+          </button>
+          {/* Colapsar en desktop */}
+          <button
+            onClick={() => setSidebarCollapsed(true)}
+            title="Ocultar menú"
+            className="hidden lg:block p-1 text-slate-400 hover:text-slate-700 rounded-md transition-colors"
+          >
+            <PanelLeftClose className="w-5 h-5" />
           </button>
         </div>
 

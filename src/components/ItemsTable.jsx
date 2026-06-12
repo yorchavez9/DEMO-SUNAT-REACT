@@ -71,7 +71,7 @@ export const SUNAT_UNITS = [
   { cod: 'UM',  sym: 'MILL', desc: 'Millón' },
 ];
 
-export default function ItemsTable({ items, onChange, moneda = 'PEN' }) {
+export default function ItemsTable({ items, onChange, moneda = 'PEN', showDescuentos = false }) {
   const simbolo = moneda === 'USD' ? '$' : moneda === 'EUR' ? '€' : 'S/';
 
   function updateItem(idx, field, value) {
@@ -81,31 +81,23 @@ export default function ItemsTable({ items, onChange, moneda = 'PEN' }) {
   }
 
   function removeItem(idx) {
-    const updated = items.filter((_, i) => i !== idx);
-    onChange(updated);
+    onChange(items.filter((_, i) => i !== idx));
   }
 
-  // Cálculo rápido
   const totales = items.reduce((acc, it) => {
     const cantidad = parseFloat(it.cantidad) || 0;
     const precio = parseFloat(it.precio_unitario) || 0;
-    const subtotal = cantidad * precio;
+    const descuento = showDescuentos ? (parseFloat(it.descuento_monto) || 0) : 0;
+    const subtotal = cantidad * precio - descuento;
     const afe = it.tip_afe_igv || '10';
-    let igv = 0;
-    let baseGravada = 0;
-    let baseNoGravada = 0;
-
     if (afe === '10') {
-      baseGravada = subtotal / 1.18;
-      igv = subtotal - baseGravada;
+      const bg = subtotal / 1.18;
+      acc.baseGravada += bg;
+      acc.igv += subtotal - bg;
     } else if (afe === '20' || afe === '30') {
-      baseNoGravada = subtotal;
+      acc.baseNoGravada += subtotal;
     }
-
     acc.subtotal += subtotal;
-    acc.baseGravada += baseGravada;
-    acc.baseNoGravada += baseNoGravada;
-    acc.igv += igv;
     return acc;
   }, { subtotal: 0, baseGravada: 0, baseNoGravada: 0, igv: 0 });
 
@@ -125,13 +117,16 @@ export default function ItemsTable({ items, onChange, moneda = 'PEN' }) {
                 <th className="w-24 text-right">Cantidad</th>
                 <th className="w-28 text-right">Precio Unit.</th>
                 <th className="w-28">IGV</th>
+                {showDescuentos && <th className="w-24 text-right text-orange-600">Desc.</th>}
                 <th className="w-28 text-right">Total</th>
                 <th className="w-12"></th>
               </tr>
             </thead>
             <tbody>
               {items.map((it, idx) => {
-                const total = (parseFloat(it.cantidad) || 0) * (parseFloat(it.precio_unitario) || 0);
+                const subtotal = (parseFloat(it.cantidad) || 0) * (parseFloat(it.precio_unitario) || 0);
+                const descuento = showDescuentos ? (parseFloat(it.descuento_monto) || 0) : 0;
+                const total = subtotal - descuento;
                 return (
                   <tr key={idx}>
                     <td>
@@ -155,9 +150,7 @@ export default function ItemsTable({ items, onChange, moneda = 'PEN' }) {
                     </td>
                     <td>
                       <input
-                        type="number"
-                        min="0"
-                        step="any"
+                        type="number" min="0" step="any"
                         className="input-inline text-right"
                         value={it.cantidad || ''}
                         onChange={(e) => updateItem(idx, 'cantidad', e.target.value)}
@@ -165,9 +158,7 @@ export default function ItemsTable({ items, onChange, moneda = 'PEN' }) {
                     </td>
                     <td>
                       <input
-                        type="number"
-                        min="0"
-                        step="any"
+                        type="number" min="0" step="any"
                         className="input-inline text-right"
                         value={it.precio_unitario || ''}
                         onChange={(e) => updateItem(idx, 'precio_unitario', e.target.value)}
@@ -185,6 +176,17 @@ export default function ItemsTable({ items, onChange, moneda = 'PEN' }) {
                         <option value="40">Exportación</option>
                       </select>
                     </td>
+                    {showDescuentos && (
+                      <td>
+                        <input
+                          type="number" min="0" step="0.01"
+                          className="input-inline text-right text-orange-600"
+                          placeholder="0.00"
+                          value={it.descuento_monto || ''}
+                          onChange={(e) => updateItem(idx, 'descuento_monto', e.target.value)}
+                        />
+                      </td>
+                    )}
                     <td className="text-right font-bold text-slate-900">{simbolo} {total.toFixed(2)}</td>
                     <td>
                       <button
@@ -224,8 +226,8 @@ export default function ItemsTable({ items, onChange, moneda = 'PEN' }) {
                 <span className="font-semibold">{simbolo} {totales.igv.toFixed(2)}</span>
               </div>
             )}
-            <div className="flex justify-between pt-3 mt-2 text-lg">
-              <span className="font-extrabold text-slate-900">TOTAL:</span>
+            <div className="flex justify-between pt-3 mt-2 text-lg border-t border-slate-200">
+              <span className="font-extrabold text-slate-900">TOTAL ítems:</span>
               <span className="font-extrabold text-blue-600">{simbolo} {totales.subtotal.toFixed(2)}</span>
             </div>
           </div>
