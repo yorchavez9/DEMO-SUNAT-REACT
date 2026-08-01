@@ -268,7 +268,9 @@ function ActionButton({ onClick, loading, Icon, label, color }) {
 
 function ActionsCell({ d, tipo, config, downloading, descargar, setDocNota, setDocAnular }) {
   const [open, setOpen] = useState(false);
+  const [coords, setCoords] = useState(null);
   const ref = useRef(null);
+  const menuRef = useRef(null);
   const estado = d.sunat?.estado ?? d.sunat_status ?? null;
   const canAnular = !!TIPO_DOC_MAP[tipo] && estado !== 'anulado' && estado !== 'anulacion_en_proceso';
   const canNota = tipo === 'facturas' && estado !== 'anulado' && estado !== 'anulacion_en_proceso';
@@ -276,11 +278,36 @@ function ActionsCell({ d, tipo, config, downloading, descargar, setDocNota, setD
   useEffect(() => {
     if (!open) return;
     function handler(e) {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+      if (ref.current?.contains(e.target)) return;
+      if (menuRef.current?.contains(e.target)) return;
+      setOpen(false);
     }
+    // El menú es position:fixed (anclado al viewport), así que cualquier
+    // scroll o resize lo dejaría descolocado: lo cerramos.
+    const cerrar = () => setOpen(false);
     document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
+    // capture: el scroll de .table-wrap no burbujea hasta window
+    window.addEventListener('scroll', cerrar, true);
+    window.addEventListener('resize', cerrar);
+    return () => {
+      document.removeEventListener('mousedown', handler);
+      window.removeEventListener('scroll', cerrar, true);
+      window.removeEventListener('resize', cerrar);
+    };
   }, [open]);
+
+  function toggle(e) {
+    if (open) { setOpen(false); return; }
+    const r = e.currentTarget.getBoundingClientRect();
+    // Alto estimado: cada ítem mide ~34px, más el padding vertical del menú
+    const alto = actions.length * 34 + 8;
+    const abrirArriba = (r.bottom + alto + 8 > window.innerHeight) && (r.top - alto - 8 > 0);
+    setCoords({
+      top: abrirArriba ? r.top - alto - 4 : r.bottom + 4,
+      right: Math.max(8, window.innerWidth - r.right),
+    });
+    setOpen(true);
+  }
 
   const actions = [
     { key: 'pdf',    Icon: FileText,    label: 'PDF',   textClass: 'text-blue-600',  hoverClass: 'hover:bg-blue-50'  },
@@ -321,16 +348,20 @@ function ActionsCell({ d, tipo, config, downloading, descargar, setDocNota, setD
         ))}
       </div>
       {/* Móvil y tableta (<1024px): dropdown */}
-      <div className="lg:hidden relative" ref={ref}>
+      <div className="lg:hidden" ref={ref}>
         <button
           type="button"
-          onClick={() => setOpen((v) => !v)}
+          onClick={toggle}
           className="inline-flex items-center px-1.5 py-1 rounded-md text-slate-500 hover:bg-slate-100 transition-colors"
         >
           <MoreVertical className="w-4 h-4" />
         </button>
-        {open && (
-          <div className="absolute right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-30 py-1 overflow-hidden" style={{ minWidth: '10rem' }}>
+        {open && coords && (
+          <div
+            ref={menuRef}
+            className="fixed bg-white border border-slate-200 rounded-xl shadow-lg z-40 py-1 overflow-hidden"
+            style={{ top: coords.top, right: coords.right, minWidth: '10rem' }}
+          >
             {actions.map((a) => (
               <button
                 key={a.key}
